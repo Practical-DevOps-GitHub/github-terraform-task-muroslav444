@@ -5,7 +5,7 @@ provider "github" {
 resource "github_repository" "repo" {
   name        = "github-terraform-task-muroslav444"  
   description = "Your repository description"  
-  visibility  = "private"  
+  visibility  = "private" 
 }
 
 resource "github_branch" "develop" {
@@ -23,23 +23,18 @@ resource "github_branch_default" "default" {
   branch     = github_branch.develop.branch
 }
 
-resource "github_branch_protection_rule" "main" {
+resource "github_branch_protection" "main" {
   repository = github_repository.repo.name
-  pattern    = "main"
-  enforcement_level = "enforce"
-  require_code_owner_reviews = false
+  branch     = github_branch.main.branch
+  enforce_admins = true
 }
 
-resource "github_branch_protection_rule" "develop" {
+resource "github_branch_protection" "develop" {
   repository = github_repository.repo.name
-  pattern    = "develop"
-  enforcement_level = "enforce"
-  require_code_owner_reviews = false
-
+  branch     = github_branch.develop.branch
   required_pull_request_reviews {
-    dismissal_restrictions {
-      users = ["*"]
-    }
+    dismiss_stale_reviews     = true
+    require_code_owner_reviews = false
     required_approving_review_count = 2
   }
 }
@@ -50,43 +45,43 @@ resource "github_repository_collaborator" "softservedata" {
   permission = "pull"
 }
 
-resource "github_repository_file" "pull_request_template" {
+resource "github_repository_contents" "pull_request_template" {
   repository = github_repository.repo.name
   file_path  = ".github/pull_request_template.md"
-  content    = <<-EOF
-    Describe your changes
+  content    = <<EOF
+Describe your changes
 
-    Issue ticket number and link
+Issue ticket number and link
 
-    Checklist before requesting a review
-    - [ ] I have performed a self-review of my code
-    - [ ] If it is a core feature, I have added thorough tests
-    - [ ] Do we need to implement analytics?
-    - [ ] Will this be part of a product update? If yes, please write one phrase about this update
-  EOF
+Checklist before requesting a review
+- [ ] I have performed a self-review of my code
+- [ ] If it is a core feature, I have added thorough tests
+- [ ] Do we need to implement analytics?
+- [ ] Will this be part of a product update? If yes, please write one phrase about this update
+EOF
 }
 
-resource "github_deploy_key" "deploy_key" {
+resource "github_repository_deploy_key" "deploy_key" {
   repository = github_repository.repo.name
   title      = "DEPLOY_KEY"
-  key        = var.ssh_public_key  # Provide your public SSH key here
+  key        = var.ssh_public_key  
   read_only  = true
 }
 
 resource "github_actions_secret" "pat_secret" {
   repository = github_repository.repo.name
   secret_name = "PAT"
-  plaintext_value = "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"  # Replace with your GitHub Personal Access Token (PAT)
+  plaintext_value = "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"  
 }
+
 
 resource "github_repository_webhook" "discord_webhook" {
   repository     = github_repository.repo.name
   name           = "discord"
   active         = true
   events         = ["pull_request"]
-  
-  configuration {
-    url          = "https://discord.com/api/webhooks/1131582221589942342/QPu0CLB0XO-QMDI31JyHHX72YuGoILhZK9Z_aJTpKSpyIi0eDzMYPkSQ0FGHM0arwv2_"  # Replace with your Discord webhook URL
+  configuration = {
+    url          = "https://discord.com/api/webhooks/1131582221589942342/QPu0CLB0XO-QMDI31JyHHX72YuGoILhZK9Z_aJTpKSpyIi0eDzMYPkSQ0FGHM0arwv2_" 
     content_type = "json"
   }
 }
