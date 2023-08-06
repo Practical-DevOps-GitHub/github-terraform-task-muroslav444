@@ -4,7 +4,7 @@ provider "github" {
 
 resource "github_repository" "repo" {
   name        = "github-terraform-task-muroslav444"  
-  description = "Your repository description"  
+  description = "Your repository description" 
   visibility  = "private"  
 }
 
@@ -13,14 +13,19 @@ resource "github_branch" "develop" {
   branch     = "develop"
 }
 
-resource "github_branch_default" "develop" {
+resource "github_branch" "main" {
+  repository = github_repository.repo.name
+  branch     = "main"
+}
+
+resource "github_branch_default" "default" {
   repository = github_repository.repo.name
   branch     = github_branch.develop.branch
 }
 
 resource "github_branch_protection" "main" {
   repository = github_repository.repo.name
-  branch     = "main"
+  branch     = github_branch.main.branch
   enforce_admins = true
 }
 
@@ -59,7 +64,7 @@ EOF
 resource "github_deploy_key" "deploy_key" {
   repository = github_repository.repo.name
   title      = "DEPLOY_KEY"
-  key        = var.ssh_public_key  # Provide your public SSH key here
+  key        = var.ssh_public_key  
   read_only  = true
 }
 
@@ -69,7 +74,6 @@ resource "github_actions_secret" "pat_secret" {
   plaintext_value = var.github_token
 }
 
-# Replace the webhook URL with your Discord webhook URL
 resource "github_repository_webhook" "discord_webhook" {
   repository     = github_repository.repo.name
   name           = "discord"
