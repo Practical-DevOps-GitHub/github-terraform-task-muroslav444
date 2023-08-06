@@ -1,11 +1,11 @@
 provider "github" {
-  token = "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"  
+  token = "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"
 }
 
 resource "github_repository" "repo" {
-  name        = "github-terraform-task-muroslav444" 
-  description = "Your repository description"  
-  visibility  = "private"  
+  name        = "github-terraform-task-muroslav444"
+  description = "Your repository description"
+  visibility  = "private"
 }
 
 resource "github_branch" "develop" {
@@ -23,13 +23,13 @@ resource "github_branch_default" "default" {
   branch     = github_branch.develop.branch
 }
 
-resource "github_branch_protection" "main" {
+resource "github_branch_protection_rule" "main" {
   repository = github_repository.repo.name
   branch     = github_branch.main.branch
   enforce_admins = true
 }
 
-resource "github_branch_protection" "develop" {
+resource "github_branch_protection_rule" "develop" {
   repository = github_repository.repo.name
   branch     = github_branch.develop.branch
   required_pull_request_reviews {
@@ -64,23 +64,22 @@ EOF
 resource "github_repository_deploy_key" "deploy_key" {
   repository = github_repository.repo.name
   title      = "DEPLOY_KEY"
-  key        = var.ssh_public_key 
+  key        = var.ssh_public_key
   read_only  = true
 }
 
 resource "github_actions_secret" "pat_secret" {
   repository = github_repository.repo.name
   secret_name = "PAT"
-  plaintext_value = "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"  
+  plaintext_value = "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"
 }
 
-# Replace the webhook URL with your Discord webhook URL
 resource "github_repository_webhook" "discord_webhook" {
   repository     = github_repository.repo.name
   active         = true
   events         = ["pull_request"]
   configuration = {
-    url          = "https://discord.com/api/webhooks/1131582221589942342/QPu0CLB0XO-QMDI31JyHHX72YuGoILhZK9Z_aJTpKSpyIi0eDzMYPkSQ0FGHM0arwv2_"  
+    url          = "https://discord.com/api/webhooks/1131582221589942342/QPu0CLB0XO-QMDI31JyHHX72YuGoILhZK9Z_aJTpKSpyIi0eDzMYPkSQ0FGHM0arwv2_"
     content_type = "json"
   }
 }
