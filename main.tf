@@ -1,10 +1,10 @@
 provider "github" {
-  token = var.github_token
+  token = "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" 
 }
 
 resource "github_repository" "repo" {
   name        = "github-terraform-task-muroslav444"  
-  description = "Your repository description" 
+  description = "Your repository description"  
   visibility  = "private"  
 }
 
@@ -61,17 +61,10 @@ Checklist before requesting a review
 EOF
 }
 
-resource "github_deploy_key" "deploy_key" {
-  repository = github_repository.repo.name
-  title      = "DEPLOY_KEY"
-  key        = var.ssh_public_key  
-  read_only  = true
-}
-
 resource "github_actions_secret" "pat_secret" {
   repository = github_repository.repo.name
   secret_name = "PAT"
-  plaintext_value = var.github_token
+  plaintext_value = "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"  # Replace with your GitHub Personal Access Token (PAT)
 }
 
 resource "github_repository_webhook" "discord_webhook" {
@@ -80,16 +73,7 @@ resource "github_repository_webhook" "discord_webhook" {
   active         = true
   events         = ["pull_request"]
   configuration = {
-    url          = "https://discord.com/api/webhooks/1131582221589942342/QPu0CLB0XO-QMDI31JyHHX72YuGoILhZK9Z_aJTpKSpyIi0eDzMYPkSQ0FGHM0arwv2_"
+    url          = "https://discord.com/api/webhooks/1131582221589942342/QPu0CLB0XO-QMDI31JyHHX72YuGoILhZK9Z_aJTpKSpyIi0eDzMYPkSQ0FGHM0arwv2_"  # Replace with your Discord webhook URL
     content_type = "json"
   }
-}
-
-# Variables
-variable "github_token" {
-  description = "GitHub Personal Access Token with Full control of private repositories, Full control of orgs and teams, and read and write org projects"
-}
-
-variable "ssh_public_key" {
-  description = "SSH public key to be used for the DEPLOY_KEY"
 }
